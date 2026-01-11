@@ -9,22 +9,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600&display=swap');
         
-        /* STRICT OVERFLOW CONTROL */
         html, body { 
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; 
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif; 
-            background: #f8f6ed; 
-            overscroll-behavior: none;
+            position: fixed; width: 100%; height: 100%; overflow: hidden; 
+            margin: 0; padding: 0; font-family: 'Inter', sans-serif; 
+            background: #f8f6ed; overscroll-behavior: none;
         }
 
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         
-        .carousel-container { perspective: 1200px; transition: filter 0.6s ease; }
+        .carousel-container { perspective: 1200px; }
         .city-slide { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; cursor: pointer; }
         .city-slide.center { transform: translate(-50%, -50%) scale(1) rotateY(0deg); z-index: 30; opacity: 1; }
         .city-slide.left { transform: translate(-180%, -50%) scale(0.75) rotateY(15deg); z-index: 10; opacity: 0.3; }
@@ -32,45 +25,28 @@
         .city-slide.hidden-left { transform: translate(-300%, -50%) scale(0.5) rotateY(20deg); opacity: 0; pointer-events: none; }
         .city-slide.hidden-right { transform: translate(200%, -50%) scale(0.5) rotateY(-20deg); opacity: 0; pointer-events: none; }
         
+        /* Removed box-shadow from cards as requested */
+        .city-slide img { box-shadow: none !important; }
+
         .info-panel-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; pointer-events: none; }
-        .info-panel { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); background: #fdfcf8; border-top: 1px solid rgba(139, 92, 46, 0.1); pointer-events: auto; max-height: 90vh; overflow-y: auto; box-shadow: 0 -20px 60px -10px rgba(45, 26, 10, 0.15); border-radius: 3rem 3rem 0 0; position: relative; }
+        .info-panel { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); background: #fdfcf8; border-top: 1px solid rgba(139, 92, 46, 0.1); pointer-events: auto; max-height: 90vh; overflow-y: auto; border-radius: 3rem 3rem 0 0; position: relative; }
         .info-panel.expanded { transform: translateY(0); }
 
-        /* IMAGE BLENDING: Radial mask creates soft edges that bleed into background */
         .drawer-hero-img { 
-            width: 100%; 
-            max-width: 450px; 
-            height: auto; 
-            aspect-ratio: 1 / 1; 
-            object-fit: contain; 
-            margin: 0 auto; 
-            display: block; 
-            mix-blend-mode: multiply; 
-            -webkit-mask-image: radial-gradient(circle, black 40%, rgba(0,0,0,0.4) 75%, transparent 100%); 
-            mask-image: radial-gradient(circle, black 40%, rgba(0,0,0,0.4) 75%, transparent 100%); 
+            width: 100%; max-width: 450px; height: auto; aspect-ratio: 1 / 1; 
+            object-fit: contain; margin: 0 auto; display: block; 
+            mix-blend-mode: multiply; -webkit-mask-image: radial-gradient(circle, black 40%, rgba(0,0,0,0.4) 75%, transparent 100%); 
         }
 
         .page-blur-overlay { position: fixed; inset: 0; background: rgba(45, 26, 10, 0.1); backdrop-filter: blur(0px); opacity: 0; pointer-events: none; transition: all 0.6s ease; z-index: 90; }
         .page-blur-overlay.active { opacity: 1; backdrop-filter: blur(12px); pointer-events: all; }
-        .is-blurred { filter: blur(8px); opacity: 0.6; }
-        .content-lock { pointer-events: none !important; }
-        .drag-handle { width: 40px; height: 4px; background: rgba(139, 92, 46, 0.08); border-radius: 10px; margin: 1.5rem auto; }
-        
-        /* CLOSE BUTTON: Absolute top right as requested */
-        .close-btn-fixed { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 110; }
         .btn-flat { border: 1px solid rgba(139, 92, 46, 0.15); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); transition: all 0.3s ease; }
         
-        .heart-active { color: #ef4444 !important; transform: scale(1.1); }
-        
-        .speaking-highlight { 
-            background: linear-gradient(120deg, rgba(251, 191, 36, 0.3) 0%, rgba(245, 158, 11, 0.3) 100%);
-            border-radius: 8px;
-            padding: 0.25rem 0.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
-        }
-        
-        #bucketListSidebar { position: fixed; right: -400px; top: 0; width: 100%; max-width: 350px; height: 100%; background: #fdfcf8; z-index: 150; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.05); }
+        /* Tabs Styling */
+        .tab-btn { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(120, 53, 15, 0.3); transition: all 0.3s ease; padding-bottom: 4px; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #78350f; border-bottom-color: #78350f; }
+
+        #bucketListSidebar { position: fixed; right: -400px; top: 0; width: 100%; max-width: 350px; height: 100%; background: #fdfcf8; z-index: 150; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         #bucketListSidebar.open { right: 0; }
     </style>
 </head>
@@ -85,9 +61,8 @@
         </button>
     </nav>
 
-    <header id="mainHeader" class="text-center mb-8 transition-all duration-700">
+    <header id="mainHeader" class="text-center mb-8">
         <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-3 text-amber-900 tracking-tight">Explore Cities</h1>
-        <p class="text-amber-900/40 font-semibold tracking-widest uppercase text-[10px]">Click active city to open</p>
     </header>
 
     <div id="mainCarousel" class="carousel-container relative w-full h-80 md:h-[450px] mb-12">
@@ -101,35 +76,27 @@
             <h3 class="text-2xl font-black text-amber-950">My Bucket List</h3>
             <button id="closeBucketBtn" class="text-amber-900"><i class="fas fa-times"></i></button>
         </div>
-        <div id="bucketItems" class="space-y-4">
-            <p class="text-amber-900/40 italic">Your list is empty...</p>
-        </div>
+        <div id="bucketItems" class="space-y-4"></div>
     </div>
 
     <div class="info-panel-wrapper">
         <div id="infoPanel" class="info-panel w-full max-w-6xl mx-auto px-6 pb-12 md:px-16">
-            <div class="drag-handle"></div>
-            <button id="closeBtn" class="btn-flat close-btn-fixed w-10 h-10 rounded-full flex items-center justify-center text-amber-900">
-                <i class="fas fa-times"></i>
-            </button>
+            <div class="w-10 h-1 bg-amber-900/10 rounded-full mx-auto my-6"></div>
+            <button id="closeBtn" class="btn-flat absolute top-6 right-6 w-10 h-10 rounded-full text-amber-900"><i class="fas fa-times"></i></button>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
                 <div class="flex justify-center py-4">
                     <img id="drawerImage" src="" alt="" class="drawer-hero-img">
                 </div>
 
-                <div class="relative">
-                    <h2 id="cityName" class="text-4xl md:text-6xl font-black text-amber-950 mb-1 pr-12 transition-all duration-300"></h2>
+                <div class="relative py-4">
+                    <h2 id="cityName" class="text-4xl md:text-6xl font-black text-amber-950 mb-1"></h2>
                     <p id="citySubtitle" class="text-xl text-amber-800/60 mb-6 font-medium"></p>
                     
                     <div class="flex gap-4 mb-8">
                         <button id="addToBucketBtn" class="btn-flat px-6 py-3 rounded-full flex items-center gap-2 text-amber-900 font-bold text-sm">
                             <i class="fa-regular fa-heart" id="heartIcon"></i>
                             <span>Add to Bucket List</span>
-                        </button>
-                        <button id="speakBtn" class="btn-flat px-6 py-3 rounded-full flex items-center gap-2 text-amber-900 font-bold text-sm">
-                            <i class="fas fa-volume-up" id="speakIcon"></i>
-                            <span>Listen</span>
                         </button>
                     </div>
 
@@ -147,72 +114,85 @@
                             <span id="cityNickname" class="text-lg font-bold text-amber-900"></span>
                         </div>
                     </div>
-                    <p id="descriptionText" class="text-amber-900/70 leading-relaxed text-lg font-normal mb-8 transition-all duration-300"></p>
+
+                    <p id="descriptionText" class="text-amber-900/70 leading-relaxed text-lg font-normal mb-10"></p>
+
+                    <div class="border-t border-amber-900/5 pt-6">
+                        <div class="flex gap-6 mb-4">
+                            <button onclick="switchTab('history')" id="tab-history" class="tab-btn active">History</button>
+                            <button onclick="switchTab('food')" id="tab-food" class="tab-btn">Food</button>
+                            <button onclick="switchTab('landmarks')" id="tab-landmarks" class="tab-btn">Landmarks</button>
+                        </div>
+                        <div id="tabContent" class="text-amber-900/50 leading-relaxed text-base italic transition-opacity duration-300">
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="dotsContainer" class="flex gap-4 mt-6 transition-all duration-700"></div>
+    <div id="dotsContainer" class="flex gap-4 mt-6"></div>
 
     <script>
         const cities = [
-            { id: 1, name: "New York City", subtitle: "The Big Apple", image: "cities/NYC.png", population: "8.3M", country: "USA", nickname: "Vibrant", description: "Manhattan's iconic skyline rises like a forest of steel and glass, with Central Park's emerald expanse offering a breath of nature amidst the urban jungle." },
-            { id: 2, name: "London", subtitle: "Royal Capital", image: "cities/London.png", population: "9.0M", country: "UK", nickname: "Classic", description: "Where history meets modernity, the Thames winds through centuries of architecture. From the Tower of London to the Shard, this city creates a stunning tapestry of time." },
-            { id: 3, name: "Singapore", subtitle: "Garden City", image: "cities/Singapore.png", population: "5.9M", country: "SG", nickname: "Clean", description: "A garden city in the tropics where futuristic supertrees and gleaming skyscrapers blend seamlessly with lush greenery." },
-            { id: 4, name: "Dubai", subtitle: "Desert Jewel", image: "cities/Dubai.png", population: "3.6M", country: "UAE", nickname: "Grand", description: "Rising from the desert sands, a marvel of human ambition. The Burj Khalifa pierces the clouds while artificial islands reshape the coastline." },
-            { id: 5, name: "Rome", subtitle: "The Eternal City", image: "cities/Rome.png", population: "2.8M", country: "Italy", nickname: "Timeless", description: "An open-air museum spanning millennia, where ancient ruins stand proud among terracotta rooftops. Every corner whispers tales of emperors and artists." }
+            { 
+                id: 1, name: "New York City", subtitle: "The Big Apple", image: "cities/NYC.png", population: "8.3M", country: "USA", nickname: "Vibrant", 
+                description: "Manhattan's iconic skyline rises like a forest of steel and glass, with Central Park's emerald expanse offering a breath of nature.",
+                history: "Founded in 1624 as a trading post by Dutch colonists.",
+                food: "Famous for pizza, bagels, and cheesecake.",
+                landmarks: "Statue of Liberty, Empire State Building, Central Park."
+            },
+            { 
+                id: 2, name: "London", subtitle: "Royal Capital", image: "cities/London.png", population: "9.0M", country: "UK", nickname: "Classic", 
+                description: "Where history meets modernity, the Thames winds through centuries of architecture. From the Tower of London to the Shard.",
+                history: "Founded by the Romans who named it Londinium.",
+                food: "Try the Fish & Chips and traditional Sunday Roast.",
+                landmarks: "Big Ben, London Eye, Tower of London."
+            },
+            { 
+                id: 3, name: "Singapore", subtitle: "Garden City", image: "cities/Singapore.png", population: "5.9M", country: "SG", nickname: "Clean", 
+                description: "A garden city in the tropics where futuristic supertrees and gleaming skyscrapers blend seamlessly with lush greenery.",
+                history: "Gained independence in 1965 after a brief union with Malaysia.",
+                food: "Hawker favorites like Hainanese Chicken Rice and Laksa.",
+                landmarks: "Gardens by the Bay, Marina Bay Sands."
+            },
+            { 
+                id: 4, name: "Dubai", subtitle: "Desert Jewel", image: "cities/Dubai.png", population: "3.6M", country: "UAE", nickname: "Grand", 
+                description: "Rising from the desert sands, a marvel of human ambition. The Burj Khalifa pierces the clouds while artificial islands reshape the coastline.",
+                history: "Transformed from a small fishing village to a global hub in 50 years.",
+                food: "Shawarma, Manousheh, and traditional Arabic coffee.",
+                landmarks: "Burj Khalifa, Palm Jumeirah, Dubai Mall."
+            },
+            { 
+                id: 5, name: "Rome", subtitle: "The Eternal City", image: "cities/Rome.png", population: "2.8M", country: "Italy", nickname: "Timeless", 
+                description: "An open-air museum spanning millennia, where ancient ruins stand proud among terracotta rooftops. Every corner whispers tales of emperors.",
+                history: "According to legend, Rome was founded by Romulus in 753 BC.",
+                food: "Authentic Carbonara, Cacio e Pepe, and Gelato.",
+                landmarks: "Colosseum, Pantheon, Trevi Fountain."
+            }
         ];
 
         let currentIndex = 0;
+        let activeTab = 'history';
         let bucketList = [];
-        let speechSynthesis = window.speechSynthesis;
-        let currentUtterance = null;
-        
-        const carousel = document.getElementById('carousel');
-        const infoPanel = document.getElementById('infoPanel');
-        const blurOverlay = document.getElementById('blurOverlay');
-        const dotsContainer = document.getElementById('dotsContainer');
-        const bucketSidebar = document.getElementById('bucketListSidebar');
-        const bucketBadge = document.getElementById('bucketBadge');
 
-        cities.forEach((city, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'city-slide';
-            slide.innerHTML = `<div><img src="${city.image}" class="w-56 h-56 md:w-80 md:h-80 lg:w-96 lg:h-96 object-cover rounded-[3rem]"><div class="text-center mt-6"><h3 class="text-2xl font-black text-amber-900 opacity-80">${city.name}</h3></div></div>`;
-            slide.onclick = () => index === currentIndex ? toggleDrawer(true) : goToSlide(index);
-            carousel.appendChild(slide);
-
-            const dot = document.createElement('button');
-            dot.className = 'w-2 h-2 rounded-full bg-amber-900/20 transition-all duration-500';
-            dot.onclick = () => goToSlide(index);
-            dotsContainer.appendChild(dot);
-        });
-
-        function toggleDrawer(open) {
-            const components = [document.getElementById('mainHeader'), document.getElementById('mainCarousel'), dotsContainer];
-            if (open) {
-                infoPanel.classList.add('expanded');
-                blurOverlay.classList.add('active');
-                components.forEach(el => el.classList.add('is-blurred', 'content-lock'));
-                updateHeartUI();
-            } else {
-                infoPanel.classList.remove('expanded');
-                blurOverlay.classList.remove('active');
-                components.forEach(el => el.classList.remove('is-blurred', 'content-lock'));
-                // Stop speech when closing drawer
-                if (speechSynthesis.speaking) {
-                    speechSynthesis.cancel();
-                    document.getElementById('speakIcon').className = 'fas fa-volume-up';
-                    document.querySelector('#speakBtn span').textContent = 'Listen';
-                    document.getElementById('cityName').classList.remove('speaking-highlight');
-                    document.getElementById('descriptionText').classList.remove('speaking-highlight');
-                }
-            }
+        function switchTab(tab) {
+            activeTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            const content = document.getElementById('tabContent');
+            content.style.opacity = 0;
+            setTimeout(() => {
+                content.textContent = cities[currentIndex][tab];
+                content.style.opacity = 1;
+            }, 150);
         }
 
         function updateCarousel() {
+            const city = cities[currentIndex];
             const slides = document.querySelectorAll('.city-slide');
+            
             slides.forEach((slide, index) => {
                 slide.classList.remove('center', 'left', 'right', 'hidden-left', 'hidden-right');
                 if (index === currentIndex) slide.classList.add('center');
@@ -221,11 +201,7 @@
                 else if (index < currentIndex) slide.classList.add('hidden-left');
                 else slide.classList.add('hidden-right');
             });
-            Array.from(dotsContainer.children).forEach((dot, index) => {
-                dot.style.width = index === currentIndex ? '24px' : '8px';
-                dot.style.background = index === currentIndex ? 'rgba(120, 53, 15, 0.8)' : 'rgba(120, 53, 15, 0.1)';
-            });
-            const city = cities[currentIndex];
+
             document.getElementById('drawerImage').src = city.image;
             document.getElementById('cityName').textContent = city.name;
             document.getElementById('citySubtitle').textContent = city.subtitle;
@@ -234,151 +210,47 @@
             document.getElementById('cityNickname').textContent = city.nickname;
             document.getElementById('descriptionText').textContent = city.description;
             
-            // Stop speech when changing cities
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-                document.getElementById('speakIcon').className = 'fas fa-volume-up';
-                document.querySelector('#speakBtn span').textContent = 'Listen';
-                document.getElementById('cityName').classList.remove('speaking-highlight');
-                document.getElementById('descriptionText').classList.remove('speaking-highlight');
-            }
+            switchTab(activeTab);
+
+            Array.from(document.getElementById('dotsContainer').children).forEach((dot, i) => {
+                dot.style.width = i === currentIndex ? '24px' : '8px';
+                dot.style.background = i === currentIndex ? 'rgba(120, 53, 15, 0.8)' : 'rgba(120, 53, 15, 0.1)';
+            });
         }
 
-        function toggleBucketList() {
-            const city = cities[currentIndex];
-            const idx = bucketList.findIndex(item => item.id === city.id);
-            if (idx > -1) bucketList.splice(idx, 1);
-            else bucketList.push(city);
-            updateBucketUI();
-            updateHeartUI();
-        }
-
-        function updateHeartUI() {
-            const city = cities[currentIndex];
-            const isAdded = bucketList.some(item => item.id === city.id);
-            const icon = document.getElementById('heartIcon');
-            const btnText = document.querySelector('#addToBucketBtn span');
-            if (isAdded) {
-                icon.className = 'fa-solid fa-heart heart-active';
-                btnText.textContent = "In your Bucket List";
+        function toggleDrawer(open) {
+            const panel = document.getElementById('infoPanel');
+            const overlay = document.getElementById('blurOverlay');
+            if (open) {
+                panel.classList.add('expanded');
+                overlay.classList.add('active');
             } else {
-                icon.className = 'fa-regular fa-heart';
-                btnText.textContent = "Add to Bucket List";
+                panel.classList.remove('expanded');
+                overlay.classList.remove('active');
             }
         }
 
-        function updateBucketUI() {
-            const container = document.getElementById('bucketItems');
-            bucketBadge.textContent = bucketList.length;
-            bucketBadge.classList.toggle('hidden', bucketList.length === 0);
-            
-            if (bucketList.length === 0) {
-                container.innerHTML = '<p class="text-amber-900/40 italic">Your list is empty...</p>';
-                return;
-            }
-            container.innerHTML = bucketList.map(city => `
-                <div class="flex items-center gap-4 p-3 bg-white rounded-2xl border border-amber-900/5">
-                    <img src="${city.image}" class="w-12 h-12 rounded-xl object-cover">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-amber-950 text-sm">${city.name}</h4>
-                        <p class="text-[10px] text-amber-800/50">${city.country}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
+        const carouselEl = document.getElementById('carousel');
+        cities.forEach((city, i) => {
+            const slide = document.createElement('div');
+            slide.className = 'city-slide';
+            slide.innerHTML = `<img src="${city.image}" class="w-64 h-64 md:w-80 md:h-80 object-cover rounded-[3rem]"><h3 class="text-center mt-4 text-xl font-bold text-amber-900">${city.name}</h3>`;
+            slide.onclick = () => i === currentIndex ? toggleDrawer(true) : (currentIndex = i, updateCarousel());
+            carouselEl.appendChild(slide);
 
-        function speakCityInfo() {
-            const city = cities[currentIndex];
-            const speakIcon = document.getElementById('speakIcon');
-            const speakBtnText = document.querySelector('#speakBtn span');
-            const cityNameEl = document.getElementById('cityName');
-            const descriptionEl = document.getElementById('descriptionText');
-            
-            // Stop if already speaking
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-                speakIcon.className = 'fas fa-volume-up';
-                speakBtnText.textContent = 'Listen';
-                cityNameEl.classList.remove('speaking-highlight');
-                descriptionEl.classList.remove('speaking-highlight');
-                return;
-            }
-            
-            // Clear any pending speech
-            speechSynthesis.cancel();
-            
-            // Small delay to ensure cancel completes
-            setTimeout(() => {
-                // Speak city name first
-                const nameUtterance = new SpeechSynthesisUtterance(city.name);
-                nameUtterance.rate = 0.9;
-                nameUtterance.pitch = 1;
-                nameUtterance.volume = 1;
-                
-                nameUtterance.onstart = () => {
-                    cityNameEl.classList.add('speaking-highlight');
-                };
-                
-                nameUtterance.onend = () => {
-                    cityNameEl.classList.remove('speaking-highlight');
-                    
-                    // Short pause before description
-                    setTimeout(() => {
-                        const descUtterance = new SpeechSynthesisUtterance(city.description);
-                        descUtterance.rate = 0.9;
-                        descUtterance.pitch = 1;
-                        descUtterance.volume = 1;
-                        
-                        descUtterance.onstart = () => {
-                            descriptionEl.classList.add('speaking-highlight');
-                        };
-                        
-                        descUtterance.onend = () => {
-                            descriptionEl.classList.remove('speaking-highlight');
-                            speakIcon.className = 'fas fa-volume-up';
-                            speakBtnText.textContent = 'Listen';
-                        };
-                        
-                        descUtterance.onerror = () => {
-                            descriptionEl.classList.remove('speaking-highlight');
-                            speakIcon.className = 'fas fa-volume-up';
-                            speakBtnText.textContent = 'Listen';
-                        };
-                        
-                        speechSynthesis.speak(descUtterance);
-                    }, 300);
-                };
-                
-                nameUtterance.onerror = () => {
-                    cityNameEl.classList.remove('speaking-highlight');
-                    speakIcon.className = 'fas fa-volume-up';
-                    speakBtnText.textContent = 'Listen';
-                };
-                
-                // Update button while speaking
-                speakIcon.className = 'fas fa-stop';
-                speakBtnText.textContent = 'Stop';
-                
-                speechSynthesis.speak(nameUtterance);
-            }, 100);
-        }
+            const dot = document.createElement('button');
+            dot.className = 'w-2 h-2 rounded-full transition-all duration-500';
+            dot.onclick = () => { currentIndex = i; updateCarousel(); };
+            document.getElementById('dotsContainer').appendChild(dot);
+        });
 
-        document.getElementById('addToBucketBtn').onclick = toggleBucketList;
-        document.getElementById('speakBtn').onclick = speakCityInfo;
-        document.getElementById('openBucketBtn').onclick = () => {
-            bucketSidebar.classList.add('open');
-            blurOverlay.classList.add('active');
-        };
-        document.getElementById('closeBucketBtn').onclick = () => {
-            bucketSidebar.classList.remove('open');
-            if(!infoPanel.classList.contains('expanded')) blurOverlay.classList.remove('active');
-        };
-        document.getElementById('nextBtn').onclick = () => { currentIndex = (currentIndex + 1) % cities.length; updateCarousel(); };
         document.getElementById('prevBtn').onclick = () => { currentIndex = (currentIndex - 1 + cities.length) % cities.length; updateCarousel(); };
+        document.getElementById('nextBtn').onclick = () => { currentIndex = (currentIndex + 1) % cities.length; updateCarousel(); };
         document.getElementById('closeBtn').onclick = () => toggleDrawer(false);
-        blurOverlay.onclick = () => { toggleDrawer(false); bucketSidebar.classList.remove('open'); };
+        document.getElementById('blurOverlay').onclick = () => { toggleDrawer(false); document.getElementById('bucketListSidebar').classList.remove('open'); };
+        document.getElementById('openBucketBtn').onclick = () => document.getElementById('bucketListSidebar').classList.add('open');
+        document.getElementById('closeBucketBtn').onclick = () => document.getElementById('bucketListSidebar').classList.remove('open');
         
-        function goToSlide(index) { currentIndex = index; updateCarousel(); }
         updateCarousel();
     </script>
 </body>
