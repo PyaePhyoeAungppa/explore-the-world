@@ -2,14 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cities Carousel & Bucket List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600&display=swap');
         
-        body { font-family: 'Inter', sans-serif; background: #f8f6ed; overflow-x: hidden; }
+        html, body { 
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif; 
+            background: #f8f6ed; 
+            overscroll-behavior: none;
+        }
+
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
         
         .carousel-container { perspective: 1200px; transition: filter 0.6s ease; }
@@ -20,35 +31,80 @@
         .city-slide.hidden-left { transform: translate(-300%, -50%) scale(0.5) rotateY(20deg); opacity: 0; pointer-events: none; }
         .city-slide.hidden-right { transform: translate(200%, -50%) scale(0.5) rotateY(-20deg); opacity: 0; pointer-events: none; }
         
-        .info-panel-wrapper { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; pointer-events: none; }
-        .info-panel { transform: translateY(105%); transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); background: #fdfcf8; border-top: 1px solid rgba(139, 92, 46, 0.1); pointer-events: auto; max-height: 95vh; overflow-y: auto; box-shadow: 0 -20px 60px -10px rgba(45, 26, 10, 0.15); border-radius: 3rem 3rem 0 0; position: relative; }
+        .info-panel-wrapper { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            z-index: 100; 
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 1.5rem; /* Space at the bottom on mobile */
+        }
+
+        .info-panel { 
+            transform: translateY(110%); 
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); 
+            background: #fdfcf8; 
+            border: 1px solid rgba(139, 92, 46, 0.1); 
+            pointer-events: auto; 
+            width: 92%; /* Gives space on the sides on mobile */
+            max-width: 1100px;
+            max-height: 85vh; /* Reduced height to see background behind */
+            overflow-y: auto; 
+            box-shadow: 0 -20px 60px -10px rgba(45, 26, 10, 0.15); 
+            border-radius: 2rem; /* Reduced from 3rem */
+            position: relative; 
+        }
+
+        @media (min-width: 1024px) {
+            .info-panel {
+                width: 100%;
+                border-radius: 3rem 3rem 0 0;
+                max-height: 90vh;
+            }
+            .info-panel-wrapper {
+                padding-bottom: 0;
+            }
+        }
+
         .info-panel.expanded { transform: translateY(0); }
 
-        .drawer-hero-img { width: 100%; max-width: 450px; height: auto; aspect-ratio: 1 / 1; object-fit: contain; margin: 0 auto; display: block; mix-blend-mode: multiply; -webkit-mask-image: radial-gradient(circle, black 50%, rgba(0,0,0,0.5) 80%, transparent 100%); mask-image: radial-gradient(circle, black 50%, rgba(0,0,0,0.5) 80%, transparent 100%); }
+        .drawer-hero-img { 
+            width: 100%; 
+            max-width: 400px; 
+            height: auto; 
+            aspect-ratio: 1 / 1; 
+            object-fit: contain; 
+            margin: 0 auto; 
+            display: block; 
+            mix-blend-mode: multiply; 
+            -webkit-mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,0.4) 75%, transparent 100%); 
+            mask-image: radial-gradient(circle, black 45%, rgba(0,0,0,0.4) 75%, transparent 100%); 
+        }
 
-        .page-blur-overlay { position: fixed; inset: 0; background: rgba(45, 26, 10, 0.1); backdrop-filter: blur(0px); opacity: 0; pointer-events: none; transition: all 0.6s ease; z-index: 90; }
+        .page-blur-overlay { position: fixed; inset: 0; background: rgba(45, 26, 10, 0.2); backdrop-filter: blur(0px); opacity: 0; pointer-events: none; transition: all 0.6s ease; z-index: 90; }
         .page-blur-overlay.active { opacity: 1; backdrop-filter: blur(12px); pointer-events: all; }
         .is-blurred { filter: blur(8px); opacity: 0.6; }
         .content-lock { pointer-events: none !important; }
-        .drag-handle { width: 40px; height: 4px; background: rgba(139, 92, 46, 0.08); border-radius: 10px; margin: 1.5rem auto; }
         
-        .close-btn-fixed { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 50; }
-        .btn-flat { border: 1px solid rgba(139, 92, 46, 0.15); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); transition: all 0.3s ease; }
+        .drag-handle { width: 40px; height: 4px; background: rgba(139, 92, 46, 0.1); border-radius: 10px; margin: 1.25rem auto; }
+        .close-btn-fixed { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 110; }
         
-        /* Heart Animation */
-        .heart-active { color: #ef4444 !important; transform: scale(1.1); }
+        .btn-flat { border: 1px solid rgba(139, 92, 46, 0.15); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); transition: all 0.3s ease; }
+        .heart-active { color: #ef4444 !important; }
         
-        /* Bucket List Sidebar */
         #bucketListSidebar { position: fixed; right: -400px; top: 0; width: 100%; max-width: 350px; height: 100%; background: #fdfcf8; z-index: 150; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.05); }
         #bucketListSidebar.open { right: 0; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="flex flex-col items-center justify-center p-4">
     
     <div id="blurOverlay" class="page-blur-overlay"></div>
 
     <nav class="fixed top-6 right-6 z-50">
-        <button id="openBucketBtn" class="btn-flat w-14 h-14 rounded-full flex items-center justify-center text-amber-900 shadow-sm relative">
+        <button id="openBucketBtn" class="btn-flat w-12 h-12 rounded-full flex items-center justify-center text-amber-900 shadow-sm relative">
             <i class="fas fa-suitcase"></i>
             <span id="bucketBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
         </button>
@@ -56,19 +112,19 @@
 
     <header id="mainHeader" class="text-center mb-8 transition-all duration-700">
         <h1 class="text-4xl md:text-6xl lg:text-7xl font-black mb-3 text-amber-900 tracking-tight">Explore Cities</h1>
-        <p class="text-amber-900/40 font-semibold tracking-widest uppercase text-[10px]">Click active city to open</p>
+        <p class="text-amber-900/40 font-semibold tracking-widest uppercase text-[10px]">Tap to discover more</p>
     </header>
 
-    <div id="mainCarousel" class="carousel-container relative w-full h-80 md:h-[450px] mb-12">
+    <div id="mainCarousel" class="carousel-container relative w-full h-80 md:h-[450px] mb-8">
         <div id="carousel" class="relative w-full h-full"></div>
-        <button id="prevBtn" class="btn-flat absolute left-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full text-amber-900 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-        <button id="nextBtn" class="btn-flat absolute right-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full text-amber-900 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
+        <button id="prevBtn" class="btn-flat absolute left-4 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full text-amber-900 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+        <button id="nextBtn" class="btn-flat absolute right-4 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full text-amber-900 flex items-center justify-center"><i class="fas fa-arrow-right"></i></button>
     </div>
 
     <div id="bucketListSidebar" class="p-8">
         <div class="flex justify-between items-center mb-8">
             <h3 class="text-2xl font-black text-amber-950">My Bucket List</h3>
-            <button id="closeBucketBtn" class="text-amber-900"><i class="fas fa-times"></i></button>
+            <button id="closeBucketBtn" class="text-amber-900 text-xl"><i class="fas fa-times"></i></button>
         </div>
         <div id="bucketItems" class="space-y-4">
             <p class="text-amber-900/40 italic">Your list is empty...</p>
@@ -76,55 +132,55 @@
     </div>
 
     <div class="info-panel-wrapper">
-        <div id="infoPanel" class="info-panel w-full max-w-6xl mx-auto px-6 pb-12 md:px-16">
+        <div id="infoPanel" class="info-panel px-6 pb-10 md:px-16">
             <div class="drag-handle"></div>
-            <button id="closeBtn" class="btn-flat close-btn-fixed w-10 h-10 rounded-full flex items-center justify-center text-amber-900"><i class="fas fa-times"></i></button>
+            <button id="closeBtn" class="btn-flat close-btn-fixed w-10 h-10 rounded-full flex items-center justify-center text-amber-900">
+                <i class="fas fa-times"></i>
+            </button>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-                <div class="flex justify-center py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center">
+                <div class="flex justify-center pt-2 pb-4">
                     <img id="drawerImage" src="" alt="" class="drawer-hero-img">
                 </div>
 
-                <div>
-                    <h2 id="cityName" class="text-4xl md:text-6xl font-black text-amber-950 mb-1 pr-10"></h2>
-                    <p id="citySubtitle" class="text-xl text-amber-800/60 mb-6 font-medium"></p>
+                <div class="relative">
+                    <h2 id="cityName" class="text-3xl md:text-5xl font-black text-amber-950 mb-1 pr-12"></h2>
+                    <p id="citySubtitle" class="text-lg text-amber-800/60 mb-6 font-medium"></p>
                     
-                    <div class="flex gap-4 mb-8">
-                        <button id="addToBucketBtn" class="btn-flat px-6 py-3 rounded-full flex items-center gap-2 text-amber-900 font-bold text-sm">
-                            <i class="fa-regular fa-heart" id="heartIcon"></i>
-                            <span>Add to Bucket List</span>
-                        </button>
-                    </div>
+                    <button id="addToBucketBtn" class="btn-flat w-full md:w-auto px-6 py-3 rounded-2xl flex justify-center items-center gap-2 text-amber-900 font-bold text-sm mb-8">
+                        <i class="fa-regular fa-heart" id="heartIcon"></i>
+                        <span>Add to Bucket List</span>
+                    </button>
 
-                    <div class="grid grid-cols-3 gap-4 mb-8">
-                        <div class="border-l border-amber-900/10 pl-4">
-                            <span class="block text-[10px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Pop.</span>
-                            <span id="cityPop" class="text-lg font-bold text-amber-900"></span>
+                    <div class="grid grid-cols-3 gap-3 mb-8">
+                        <div class="border-l-2 border-amber-900/10 pl-3">
+                            <span class="block text-[9px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Pop.</span>
+                            <span id="cityPop" class="text-base font-bold text-amber-900"></span>
                         </div>
-                        <div class="border-l border-amber-900/10 pl-4">
-                            <span class="block text-[10px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Region</span>
-                            <span id="cityCountry" class="text-lg font-bold text-amber-900"></span>
+                        <div class="border-l-2 border-amber-900/10 pl-3">
+                            <span class="block text-[9px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Region</span>
+                            <span id="cityCountry" class="text-base font-bold text-amber-900"></span>
                         </div>
-                        <div class="border-l border-amber-900/10 pl-4">
-                            <span class="block text-[10px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Vibe</span>
-                            <span id="cityNickname" class="text-lg font-bold text-amber-900"></span>
+                        <div class="border-l-2 border-amber-900/10 pl-3">
+                            <span class="block text-[9px] uppercase text-amber-900/40 font-bold tracking-widest mb-1">Vibe</span>
+                            <span id="cityNickname" class="text-base font-bold text-amber-900"></span>
                         </div>
                     </div>
-                    <p id="descriptionText" class="text-amber-900/70 leading-relaxed text-lg font-normal"></p>
+                    <p id="descriptionText" class="text-amber-900/70 leading-relaxed text-base font-normal mb-4"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="dotsContainer" class="flex gap-4 mt-6 transition-all duration-700"></div>
+    <div id="dotsContainer" class="flex gap-3 mt-4 transition-all duration-700"></div>
 
     <script>
         const cities = [
-            { id: 1, name: "New York City", subtitle: "The Big Apple", image: "cities/NYC.png", population: "8.3M", country: "USA", nickname: "Vibrant", description: "Manhattan's iconic skyline rises like a forest of steel and glass..." },
-            { id: 2, name: "London", subtitle: "Royal Capital", image: "cities/London.png", population: "9.0M", country: "UK", nickname: "Classic", description: "Where history meets modernity, the Thames winds through centuries..." },
-            { id: 3, name: "Singapore", subtitle: "Garden City", image: "cities/Singapore.png", population: "5.9M", country: "SG", nickname: "Clean", description: "A garden city in the tropics where futuristic supertrees blend..." },
-            { id: 4, name: "Dubai", subtitle: "Desert Jewel", image: "cities/Dubai.png", population: "3.6M", country: "UAE", nickname: "Grand", description: "Rising from the desert sands, a marvel of human ambition..." },
-            { id: 5, name: "Rome", subtitle: "The Eternal City", image: "cities/Rome.png", population: "2.8M", country: "Italy", nickname: "Timeless", description: "An open-air museum spanning millennia, where ancient ruins stand proud..." }
+            { id: 1, name: "New York City", subtitle: "The Big Apple", image: "cities/NYC.png", population: "8.3M", country: "USA", nickname: "Vibrant", description: "Manhattan's iconic skyline rises like a forest of steel and glass, with Central Park's emerald expanse offering a breath of nature amidst the urban jungle." },
+            { id: 2, name: "London", subtitle: "Royal Capital", image: "cities/London.png", population: "9.0M", country: "UK", nickname: "Classic", description: "Where history meets modernity, the Thames winds through centuries of architecture. From the Tower of London to the Shard, this city creates a stunning tapestry of time." },
+            { id: 3, name: "Singapore", subtitle: "Garden City", image: "cities/Singapore.png", population: "5.9M", country: "SG", nickname: "Clean", description: "A garden city in the tropics where futuristic supertrees and gleaming skyscrapers blend seamlessly with lush greenery." },
+            { id: 4, name: "Dubai", subtitle: "Desert Jewel", image: "cities/Dubai.png", population: "3.6M", country: "UAE", nickname: "Grand", description: "Rising from the desert sands, a marvel of human ambition. The Burj Khalifa pierces the clouds while artificial islands reshape the coastline." },
+            { id: 5, name: "Rome", subtitle: "The Eternal City", image: "cities/Rome.png", population: "2.8M", country: "Italy", nickname: "Timeless", description: "An open-air museum spanning millennia, where ancient ruins stand proud among terracotta rooftops. Every corner whispers tales of emperors and artists." }
         ];
 
         let currentIndex = 0;
@@ -137,11 +193,10 @@
         const bucketSidebar = document.getElementById('bucketListSidebar');
         const bucketBadge = document.getElementById('bucketBadge');
 
-        // Initialize Carousel
         cities.forEach((city, index) => {
             const slide = document.createElement('div');
             slide.className = 'city-slide';
-            slide.innerHTML = `<div><img src="${city.image}" class="w-56 h-56 md:w-80 md:h-80 lg:w-96 lg:h-96 object-cover rounded-[3rem]"><div class="text-center mt-6"><h3 class="text-2xl font-black text-amber-900 opacity-80">${city.name}</h3></div></div>`;
+            slide.innerHTML = `<div><img src="${city.image}" class="w-52 h-52 md:w-80 md:h-80 lg:w-96 lg:h-96 object-cover rounded-[2.5rem]"><div class="text-center mt-6"><h3 class="text-xl md:text-2xl font-black text-amber-900 opacity-80">${city.name}</h3></div></div>`;
             slide.onclick = () => index === currentIndex ? toggleDrawer(true) : goToSlide(index);
             carousel.appendChild(slide);
 
@@ -176,7 +231,7 @@
                 else slide.classList.add('hidden-right');
             });
             Array.from(dotsContainer.children).forEach((dot, index) => {
-                dot.style.width = index === currentIndex ? '24px' : '8px';
+                dot.style.width = index === currentIndex ? '20px' : '6px';
                 dot.style.background = index === currentIndex ? 'rgba(120, 53, 15, 0.8)' : 'rgba(120, 53, 15, 0.1)';
             });
             const city = cities[currentIndex];
@@ -189,11 +244,10 @@
             document.getElementById('descriptionText').textContent = city.description;
         }
 
-        // Bucket List Logic
         function toggleBucketList() {
             const city = cities[currentIndex];
-            const index = bucketList.findIndex(item => item.id === city.id);
-            if (index > -1) bucketList.splice(index, 1);
+            const idx = bucketList.findIndex(item => item.id === city.id);
+            if (idx > -1) bucketList.splice(idx, 1);
             else bucketList.push(city);
             updateBucketUI();
             updateHeartUI();
@@ -233,7 +287,6 @@
             `).join('');
         }
 
-        // Event Listeners
         document.getElementById('addToBucketBtn').onclick = toggleBucketList;
         document.getElementById('openBucketBtn').onclick = () => {
             bucketSidebar.classList.add('open');
